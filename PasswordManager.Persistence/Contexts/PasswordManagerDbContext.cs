@@ -9,7 +9,8 @@ namespace PasswordManager.Persistence.Contexts
         public PasswordManagerDbContext(DbContextOptions<PasswordManagerDbContext> options)
             : base(options)
         {
-        }
+
+        } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
