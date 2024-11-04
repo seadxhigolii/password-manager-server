@@ -6,11 +6,26 @@ namespace PasswordManager.Persistence.Configuration
 {
     public class UserConfiguration : BaseEntityConfiguration<User, Guid>
     {
-        public void Configure(EntityTypeBuilder<User> builder)
+        public override void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.HasMany(u => u.PasswordEntries)
-                   .WithOne(p => p.User)
-                   .HasForeignKey(p => p.UserId);
+            base.Configure(builder);
+
+            builder.Property(u => u.Username)
+                   .IsRequired()
+                   .HasMaxLength(50);
+
+            builder.Property(u => u.Email)
+                   .IsRequired()
+                   .HasMaxLength(100);
+
+            builder.Property(u => u.PasswordHash)
+                   .IsRequired();
+
+            builder.Property(u => u.PasswordSalt)
+                   .IsRequired();
+
+            builder.HasIndex(u => u.Username).IsUnique();
+            builder.HasIndex(u => u.Email).IsUnique();
         }
     }
 }

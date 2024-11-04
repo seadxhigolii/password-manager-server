@@ -1,11 +1,12 @@
 using PasswordManager.Persistence.Contexts;
 using PasswordManager.Configuration.Middlewares;
 using Microsoft.EntityFrameworkCore;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
-using PasswordManager.Core.Domain;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Serilog;
 
 using SeriLog = Serilog.Log;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace PasswordManager
 {
@@ -24,10 +25,40 @@ namespace PasswordManager
             builder.Services.AddControllers();
             builder.Services.AddHttpClient();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(); 
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddDbContext<PasswordManagerDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("PasswordManagerDatabase")));
+
+            #region JWT Configuration
+
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+            var secretKey = jwtSettings["SecretKey"];
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidAudience = jwtSettings["Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+                };
+            });
+
+            #endregion JWT Configuration
+
+            builder.Services.AddAuthorization();
+
 
             var app = builder.Build();
 
@@ -41,6 +72,7 @@ namespace PasswordManager
 
             app.UseMiddleware<ExceptionMiddleware>();
 
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
 
