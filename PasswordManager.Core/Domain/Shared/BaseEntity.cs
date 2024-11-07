@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PasswordManager.Core.Domain.Shared
+﻿namespace PasswordManager.Core.Domain.Shared
 {
     public class BaseEntity<TId>
     {
@@ -14,6 +8,8 @@ namespace PasswordManager.Core.Domain.Shared
         public string? CreatedBy { get; set; }
         public DateTime? ChangedOn { get; set; }
         public string? ChangedBy { get; set; }
+        public bool Deleted { get; set; }
+        public bool Modified { get; set; }
 
         #endregion Properties
     }

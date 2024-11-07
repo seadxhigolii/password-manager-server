@@ -22,6 +22,7 @@ namespace PasswordManager.Persistence.Contexts
         public DbSet<User> Users { get; set; }
         public DbSet<Vault> Vaults { get; set; }
         public DbSet<Log> Logs { get; set; }
+        public DbSet<CustomField> CustomFields { get; set; }
 
         #endregion DbSet
     }

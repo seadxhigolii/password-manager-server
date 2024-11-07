@@ -12,6 +12,6 @@ namespace PasswordManager.Core.Domain
         public bool TwoFactorEnabled { get; set; }
 
         #endregion Properties
-        public ICollection<Vault> PasswordEntries { get; set; }
+        public ICollection<Vault> Vaults { get; set; }
     }
 }

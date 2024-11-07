@@ -10,7 +10,7 @@ public class Response<T>
     public bool Succeeded { get; set; } = true;
     public Dictionary<string, List<string>> Errors { get; set; }
     public string Message { get; set; }
-    public int StatusCode { get; set; }
+    public int StatusCode { get; set; } = 200;
 
     #endregion Properties
 

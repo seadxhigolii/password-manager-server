@@ -3,10 +3,10 @@ using PasswordManager.Configuration.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Serilog;
-
-using SeriLog = Serilog.Log;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.AspNetCore.Mvc;
 
 namespace PasswordManager
 {
@@ -14,11 +14,8 @@ namespace PasswordManager
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
 
-            SeriLog.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(builder.Configuration)
-                .CreateLogger();
+            var builder = WebApplication.CreateBuilder(args);
 
             builder.Host.UseSerilog();
 
@@ -27,6 +24,14 @@ namespace PasswordManager
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(); 
             builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddApiVersioning(options =>
+            {
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            });
 
             builder.Services.AddDbContext<PasswordManagerDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("PasswordManagerDatabase")));
@@ -75,6 +80,7 @@ namespace PasswordManager
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
+
 
             app.Run();
         }
