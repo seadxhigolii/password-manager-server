@@ -1,5 +1,5 @@
 ﻿using PasswordManager.Core.Domain.Shared;
-using PasswordManager.Core.Static;
+using PasswordManager.Core.Enum;
 
 namespace PasswordManager.Core.Domain
 {
@@ -10,7 +10,7 @@ namespace PasswordManager.Core.Domain
         // Common properties
         public Guid UserId { get; set; }
         public string Title { get; set; }
-        public VaultItemType ItemType { get; set; }
+        public VaultItemTypeEnum ItemType { get; set; }
         public string EncryptedNotes { get; set; }
         public bool IsFavorite { get; set; }
         public DateTime? LastAccessedOn { get; set; }

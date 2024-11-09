@@ -1,15 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using PasswordManager.Core.Dto;
 using PasswordManager.Core.Shared;
 using PasswordManager.Services.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PasswordManager.Services.Services
 {

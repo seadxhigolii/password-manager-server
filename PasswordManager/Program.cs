@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using PasswordManager.Configuration.Extensions;
 
 namespace PasswordManager
 {
@@ -22,6 +23,7 @@ namespace PasswordManager
             builder.Services.AddControllers();
             builder.Services.AddHttpClient();
             builder.Services.AddEndpointsApiExplorer();
+            builder.Services.RegisterIoCServices();
             builder.Services.AddSwaggerGen(); 
             builder.Services.AddHttpContextAccessor();
 

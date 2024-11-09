@@ -18,11 +18,10 @@ namespace PasswordManager.Persistence.Configuration
                    .IsRequired()
                    .HasMaxLength(100);
 
-            builder.Property(u => u.PasswordHash)
+            builder.Property(u => u.MasterPassword)
                    .IsRequired();
 
-            builder.Property(u => u.PasswordSalt)
-                   .IsRequired();
+            builder.Property(u => u.MasterPasswordHint);
 
             builder.HasIndex(u => u.Username).IsUnique();
             builder.HasIndex(u => u.Email).IsUnique();

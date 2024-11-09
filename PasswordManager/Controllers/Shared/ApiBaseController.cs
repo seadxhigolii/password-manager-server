@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PasswordManager.Persistence.Contexts;
 
 namespace PasswordManager.Api.Controllers.Shared
 {
@@ -9,5 +10,10 @@ namespace PasswordManager.Api.Controllers.Shared
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ApiBaseController : ControllerBase
     {
+        private readonly PasswordManagerDbContext _context;
+        public ApiBaseController()
+        {
+            
+        }
     }
 }

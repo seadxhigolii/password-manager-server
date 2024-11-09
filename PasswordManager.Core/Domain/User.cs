@@ -7,8 +7,8 @@ namespace PasswordManager.Core.Domain
         #region Properties
         public string Username { get; set; }
         public string Email { get; set; }
-        public string PasswordHash { get; set; }
-        public string PasswordSalt { get; set; }
+        public string MasterPassword { get; set; }
+        public string MasterPasswordHint { get; set; }
         public bool TwoFactorEnabled { get; set; }
 
         #endregion Properties

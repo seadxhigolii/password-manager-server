@@ -1,6 +1,6 @@
-﻿namespace PasswordManager.Core.Static
+﻿namespace PasswordManager.Core.Enum
 {
-    public enum VaultItemType
+    public enum VaultItemTypeEnum
     {
         Password = 1,
         SecureNote = 2,
