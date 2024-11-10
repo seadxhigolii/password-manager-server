@@ -9,7 +9,10 @@ namespace PasswordManager.Core.Domain
         public string Email { get; set; }
         public string MasterPassword { get; set; }
         public string MasterPasswordHint { get; set; }
-        public bool TwoFactorEnabled { get; set; }
+        public string PublicKey { get; set; }
+        public string EncryptedPrivateKey { get; set; }
+        public string EncryptedAESKey { get; set; }
+        public string Salt { get; set; }
 
         #endregion Properties
         public ICollection<Vault> Vaults { get; set; }

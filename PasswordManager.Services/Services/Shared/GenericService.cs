@@ -25,7 +25,6 @@ namespace PasswordManager.Services.Services.Shared
 
         private readonly DbContext _dbContext;
         private readonly DbSet<TEntity> _dbSet;
-        private readonly IDistributedCache _cache;
         private readonly IConfiguration _configuration;
 
         #endregion Properties
@@ -34,13 +33,11 @@ namespace PasswordManager.Services.Services.Shared
 
         public GenericService(
                                DbContext dbContext,
-                               IDistributedCache cache,
                                IConfiguration configuration
                              )
         {
             _dbContext = dbContext;
             _dbSet = _dbContext.Set<TEntity>();
-            _cache = cache;
             _configuration = configuration;
         }
 

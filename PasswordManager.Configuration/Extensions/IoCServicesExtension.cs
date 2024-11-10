@@ -4,8 +4,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using PasswordManager.Services.Interfaces;
+using PasswordManager.Services.Interfaces.Decryption;
+using PasswordManager.Services.Interfaces.Encryption;
 using PasswordManager.Services.Interfaces.Shared;
 using PasswordManager.Services.Services;
+using PasswordManager.Services.Services.Decryption;
+using PasswordManager.Services.Services.Encryption;
 using PasswordManager.Services.Services.Shared;
 
 namespace PasswordManager.Configuration.Extensions
@@ -29,11 +33,28 @@ namespace PasswordManager.Configuration.Extensions
 
             #endregion Shared
 
+
             #region Api
 
             services.AddScoped<IAuthService, AuthService>();
 
             #endregion Api
+
+
+
+            #region Encryption
+
+            services.AddScoped<IEncryptionService, EncryptionService>();
+
+            #endregion Encryption  
+
+
+
+            #region Decryption
+
+            services.AddScoped<IDecryptionService, DecryptionService>();
+
+            #endregion Decryption
         }
     }
 }

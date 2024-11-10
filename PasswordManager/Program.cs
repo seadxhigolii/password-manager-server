@@ -66,6 +66,19 @@ namespace PasswordManager
 
             builder.Services.AddAuthorization();
 
+            #region Cors
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
+
+            #endregion Cors
 
             var app = builder.Build();
 
@@ -82,6 +95,7 @@ namespace PasswordManager
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
+            app.UseCors();
 
 
             app.Run();

@@ -1,48 +1,75 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
+using PasswordManager.Core.Domain;
+using PasswordManager.Core.Dto;
 using PasswordManager.Core.Shared;
+using PasswordManager.Persistence.Contexts;
+using PasswordManager.Services.Helpers;
 using PasswordManager.Services.Interfaces;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using PasswordManager.Services.Interfaces.Decryption;
+using PasswordManager.Services.Interfaces.Encryption;
+using PasswordManager.Services.Services.Shared;
+using System.Security.Cryptography;
 
 namespace PasswordManager.Services.Services
 {
-    public class AuthService : IAuthService
+    public class AuthService : GenericService<User, Guid>, IAuthService
     {
         private readonly IConfiguration _configuration;
-        public AuthService(IConfiguration configuration)
+        private readonly PasswordManagerDbContext _dbContext;
+        private readonly IEncryptionService _encrpytionService;
+        private readonly IDecryptionService _decryptionService;
+
+        public AuthService(IConfiguration configuration, 
+            PasswordManagerDbContext dbContext,
+            IEncryptionService encryptionService,
+            IDecryptionService decryptionService) : base(dbContext, configuration)
         {
-            _configuration = configuration;
+            _dbContext = dbContext;
+            _encrpytionService = encryptionService;
+            _decryptionService = decryptionService;
         }
+
+        public async Task<bool> Register(RegisterDto model)
+        {
+            using (var rsa = RSA.Create(4096)) // 4096-bit RSA for maximum security
+            {
+                var publicKey = rsa.ExportRSAPublicKey();
+                var privateKey = rsa.ExportRSAPrivateKey();
+
+                var salt = Generator.GenerateSalt();
+
+                var derivedKey = _decryptionService.DeriveKeyFromPassword(model.MasterPassword, salt);
+
+                var aesKey = Generator.GenerateAESKey();
+                var encryptedPrivateKey = _encrpytionService.EncryptWithAES(privateKey, aesKey);
+
+                var encryptedAESKey = _encrpytionService.EncryptWithAES(aesKey, derivedKey);
+
+                var user = new User
+                {
+                    Id = Guid.NewGuid(),
+                    Username = model.Username,
+                    PublicKey = Convert.ToBase64String(publicKey),
+                    EncryptedPrivateKey = Convert.ToBase64String(encryptedPrivateKey),
+                    EncryptedAESKey = Convert.ToBase64String(encryptedAESKey),
+                    Salt = Convert.ToBase64String(salt)
+                };
+
+                await _dbContext.Users.AddAsync(user);
+                await _dbContext.SaveChangesAsync();
+
+                return true;
+            }
+        }
+
         public async Task<Response<string>> GenerateJwtToken(string username, CancellationToken cancellationToken)
         {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var token = Generator.GenerateJwtToken(_configuration,username, cancellationToken);
 
-            var claims = new[]
+            return new Response<string>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, username),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Name, username)
+                Data = token
             };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(double.Parse(jwtSettings["ExpiresInMinutes"])),
-                signingCredentials: creds
-            );
-
-            var response = new Response<string>
-            {
-                Data = new JwtSecurityTokenHandler().WriteToken(token)
-            };
-
-            return response;
         }
     }
 }
