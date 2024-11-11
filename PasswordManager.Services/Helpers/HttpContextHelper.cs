@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Security.Claims;
 
 namespace PasswordManager.Services.Helpers;
 
@@ -23,7 +24,11 @@ public class HttpContextHelper
 
     public static IConfiguration CurrentConfiguration => CurrentContext.RequestServices.GetService<IConfiguration>();
 
-    //public static ClaimsPrincipal User => _httpContextAccessor.HttpContext.User;
+
+    public static string? GetUserId()
+    {
+        return CurrentContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    }
 
     #endregion Methods
 }

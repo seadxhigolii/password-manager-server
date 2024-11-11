@@ -18,5 +18,13 @@ namespace PasswordManager.Services.Services.Encryption
                 return aes.IV.Concat(encrypted).ToArray();
             }
         }
+
+        public byte[] HashPassword(string password, byte[] salt, int iterations = 100_000, int hashLength = 32)
+        {
+            using (var rfc2898DeriveBytes = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256))
+            {
+                return rfc2898DeriveBytes.GetBytes(hashLength);
+            }
+        }
     }
 }

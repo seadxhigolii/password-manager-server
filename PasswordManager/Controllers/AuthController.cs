@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PasswordManager.Api.Controllers.Shared;
-using PasswordManager.Core.Dto;
+using PasswordManager.Core.Dto.Requests;
+using PasswordManager.Core.Dto.Responses;
 using PasswordManager.Core.Shared;
 using PasswordManager.Services.Interfaces;
 
@@ -18,9 +20,11 @@ namespace PasswordManager.Api.Controllers
         }
 
         [HttpPost("Register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+        [AllowAnonymous]
+        public async Task<Response<UserRegisteredDto>> Register([FromBody] RegisterDto registerDto)
         {
-            return Ok(new { Message = "User registered successfully!" });
+            var result = await _authService.Register(registerDto);
+            return result;
         }
 
         [HttpPost("Login")]

@@ -14,17 +14,21 @@ namespace PasswordManager.Persistence.Configuration
                    .IsRequired()
                    .HasMaxLength(50);
 
-            builder.Property(u => u.Email)
-                   .IsRequired()
-                   .HasMaxLength(100);
-
             builder.Property(u => u.MasterPassword)
                    .IsRequired();
 
-            builder.Property(u => u.MasterPasswordHint);
+            builder.Property(u => u.MasterPasswordHint)
+                   .IsRequired(false); ;
+
+            builder.Property(u => u.PublicKey);
+
+            builder.Property(u => u.EncryptedPrivateKey);
+
+            builder.Property(u => u.EncryptedAESKey);
+
+            builder.Property(u => u.Salt);
 
             builder.HasIndex(u => u.Username).IsUnique();
-            builder.HasIndex(u => u.Email).IsUnique();
         }
     }
 }
