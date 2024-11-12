@@ -21,24 +21,17 @@ namespace PasswordManager.Api.Controllers
 
         [HttpPost("Register")]
         [AllowAnonymous]
-        public async Task<Response<UserRegisteredDto>> Register([FromBody] RegisterDto registerDto)
+        public async Task<Response<UserRegisteredDto>> Register([FromBody] RegisterDto registerDto, CancellationToken cancellationToken)
         {
-            var result = await _authService.Register(registerDto);
+            var result = await _authService.Register(registerDto, cancellationToken);
             return result;
         }
 
         [HttpPost("Login")]
-        public async Task<Response<string>> Login([FromBody] LoginDto loginDto, CancellationToken cancellationToken)
+        [AllowAnonymous]
+        public async Task<Response<UserLoggedInDto>> Login([FromBody] LoginDto loginDto, CancellationToken cancellationToken)
         {
-            if (loginDto.Username != "test" || loginDto.Password != "password")
-            {
-                return new Response<string>
-                {
-                    StatusCode = 500
-                };
-            }
-
-            var result = await _authService.GenerateJwtToken(loginDto.Username, cancellationToken);
+            var result = await _authService.Login(loginDto, cancellationToken);
 
             return result;
         }      

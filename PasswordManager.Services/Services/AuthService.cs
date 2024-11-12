@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using PasswordManager.Core.Domain;
 using PasswordManager.Core.Dto.Requests;
 using PasswordManager.Core.Dto.Responses;
@@ -9,7 +11,10 @@ using PasswordManager.Services.Interfaces;
 using PasswordManager.Services.Interfaces.Decryption;
 using PasswordManager.Services.Interfaces.Encryption;
 using PasswordManager.Services.Services.Shared;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace PasswordManager.Services.Services
 {
@@ -30,7 +35,7 @@ namespace PasswordManager.Services.Services
             _decryptionService = decryptionService;
         }
 
-        public async Task<Response<UserRegisteredDto>> Register(RegisterDto model)
+        public async Task<Response<UserRegisteredDto>> Register(RegisterDto model, CancellationToken cancellationToken)
         {
             using (var rsa = RSA.Create(4096))
             {
@@ -78,15 +83,92 @@ namespace PasswordManager.Services.Services
             }
         }
 
-
-        public async Task<Response<string>> GenerateJwtToken(string username, CancellationToken cancellationToken)
+        public async Task<Response<UserLoggedInDto>> Login(LoginDto model, CancellationToken cancellationToken)
         {
-            var token = Generator.GenerateJwtToken(_configuration,username, cancellationToken);
-
-            return new Response<string>
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
+            if (user == null)
             {
-                Data = token
+                return new Response<UserLoggedInDto>
+                {
+                    Message = "Invalid username or password."
+                };
+            }
+
+            var salt = Convert.FromBase64String(user.Salt);
+            var hashedInputPassword = _encryptionService.HashPassword(model.Password, salt);
+
+            if (!hashedInputPassword.SequenceEqual(Convert.FromBase64String(user.MasterPassword)))
+            {
+                return new Response<UserLoggedInDto>
+                {
+                    Message = "Invalid username or password."
+                };
+            }
+
+            var derivedKey = _decryptionService.DeriveKeyFromPassword(model.Password, salt);
+
+            var encryptedAESKey = Convert.FromBase64String(user.EncryptedAESKey);
+            var aesKey = _decryptionService.DecryptWithAES(encryptedAESKey, derivedKey);
+            var encryptedPrivateKey = Convert.FromBase64String(user.EncryptedPrivateKey);
+            var privateKey = _decryptionService.DecryptWithAES(encryptedPrivateKey, aesKey);
+
+            var authToken = GenerateJwtToken(user.Username, CancellationToken.None);
+
+            var result = new UserLoggedInDto
+            {
+                UserId = user.Id,
+                AuthToken = authToken,
+                PrivateKey = Convert.ToBase64String(privateKey),
+                Username = user.Username
+            };
+
+            return new Response<UserLoggedInDto>
+            {
+                Data = result
             };
         }
+
+        public string GenerateJwtToken(string username, CancellationToken cancellationToken)
+        {
+            var jwtSettings = _configuration.GetSection("JwtSettings");
+            if (jwtSettings == null)
+            {
+                throw new ArgumentNullException(nameof(jwtSettings), "JwtSettings configuration section is missing.");
+            }
+
+            string secretKey = jwtSettings["SecretKey"];
+            string issuer = jwtSettings["Issuer"];
+            string audience = jwtSettings["Audience"];
+            string expiresInMinutes = jwtSettings["ExpiresInMinutes"];
+
+            // Ensure none of the required settings are null
+            if (string.IsNullOrEmpty(secretKey) || string.IsNullOrEmpty(issuer) ||
+                string.IsNullOrEmpty(audience) || string.IsNullOrEmpty(expiresInMinutes))
+            {
+                throw new ArgumentNullException("One or more JwtSettings values are missing or null.");
+            }
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, username),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Name, username)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(double.Parse(expiresInMinutes)),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+
     }
 }

@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PasswordManager.Services.Interfaces.Decryption
+﻿namespace PasswordManager.Services.Interfaces.Decryption
 {
     public interface IDecryptionService
     {
-        byte[] DeriveKeyFromPassword(string password, byte[] salt); 
+        byte[] DeriveKeyFromPassword(string password, byte[] salt);
+        byte[] DecryptWithAES(byte[] encryptedData, byte[] key);
     }
 }

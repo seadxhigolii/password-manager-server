@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PasswordManager.Core.Dto.Responses
+﻿namespace PasswordManager.Core.Dto.Responses
 {
     public class UserLoggedInDto
     {
+        public Guid UserId { get; set; }
+        public string? AuthToken { get; set; }
+        public string? PrivateKey { get; set; }
+        public string? Username { get; set; }
     }
 }
