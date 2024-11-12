@@ -32,7 +32,8 @@ namespace PasswordManager.Services.Services
         {
             _dbContext = dbContext;
             _encryptionService = encryptionService;
-            _decryptionService = decryptionService;
+            _decryptionService = decryptionService; 
+            _configuration = configuration;
         }
 
         public async Task<Response<UserRegisteredDto>> Register(RegisterDto model, CancellationToken cancellationToken)
