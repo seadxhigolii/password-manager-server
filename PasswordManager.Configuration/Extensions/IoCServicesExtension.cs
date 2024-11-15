@@ -37,6 +37,7 @@ namespace PasswordManager.Configuration.Extensions
             #region Api
 
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IVaultService, VaultService>();
 
             #endregion Api
 

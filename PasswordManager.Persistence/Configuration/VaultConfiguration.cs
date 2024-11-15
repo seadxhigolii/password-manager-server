@@ -15,35 +15,29 @@ namespace PasswordManager.Persistence.Configuration
                    .IsRequired()
                    .HasMaxLength(100);
 
-            builder.Property(p => p.ItemType)
-                   .IsRequired();
+            builder.Property(p => p.ItemType);
 
-            builder.Property(p => p.EncryptedNotes);
+            builder.Property(p => p.EncryptedNotes).IsRequired(false);
 
-            builder.Property(p => p.IsFavorite)
-                   .IsRequired();
+            builder.Property(p => p.IsFavorite).IsRequired(false);
 
-            builder.Property(p => p.LastAccessedOn);
+            builder.Property(p => p.LastAccessedOn).IsRequired(false);
 
-            builder.Property(p => p.Username)
-                   .HasMaxLength(100);
+            builder.Property(p => p.Username).IsRequired(false).HasMaxLength(100);
 
-            builder.Property(p => p.EncryptedPassword);
+            builder.Property(p => p.EncryptedPassword).IsRequired(false);
 
-            builder.Property(p => p.Url)
-                   .HasMaxLength(200);
+            builder.Property(p => p.Url).IsRequired(false).HasMaxLength(200);
 
-            builder.Property(p => p.PasswordHistory);
+            builder.Property(p => p.PasswordHistory).IsRequired(false); ;
 
-            builder.Property(p => p.CardholderName)
-                   .HasMaxLength(100);
+            builder.Property(p => p.CardholderName).IsRequired(false).HasMaxLength(100);
 
-            builder.Property(p => p.EncryptedCardNumber);
+            builder.Property(p => p.EncryptedCardNumber).IsRequired(false);
 
-            builder.Property(p => p.ExpirationDate)
-                   .HasMaxLength(5); // Format: MM/YY
+            builder.Property(p => p.ExpirationDate).IsRequired(false).HasMaxLength(5); // Format: MM/YY
 
-            builder.Property(p => p.EncryptedSecurityCode);
+            builder.Property(p => p.EncryptedSecurityCode).IsRequired(false);
 
             builder.HasIndex(p => p.UserId);
 

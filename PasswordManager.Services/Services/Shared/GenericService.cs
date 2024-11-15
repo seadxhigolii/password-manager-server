@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using PasswordManager.Core.Domain.Shared;
 using PasswordManager.Core.Dto.Shared;
@@ -7,14 +6,8 @@ using PasswordManager.Core.Enum;
 using PasswordManager.Core.Shared;
 using PasswordManager.Core.Extensions;
 using PasswordManager.Services.Interfaces.Shared;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using static PasswordManager.Core.Shared.IncludeDelegateDomain;
 
 namespace PasswordManager.Services.Services.Shared
@@ -45,13 +38,11 @@ namespace PasswordManager.Services.Services.Shared
 
         #region Get-ByIdAsync
 
-        public async Task<TEntity> GetByIdAsync(TId id, bool useSqlCache = false, bool useSqlCacheForAll = false, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
+        public async Task<TEntity> GetByIdAsync(TId id, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
         {
             var typeOfId = typeof(TId) == typeof(int) ? (object)Convert.ToInt32(id) : id.ToString();
 
             var data = await GetAllAsync(
-                                          useSqlCache: useSqlCache,
-                                          useSqlCacheForAll: useSqlCacheForAll,
                                           cancellationToken: cancellationToken,
                                           expression: x => x.Id.Equals(typeOfId),
                                           includeDelegates: includeDelegates
@@ -71,7 +62,7 @@ namespace PasswordManager.Services.Services.Shared
 
         #region Get-AllAsync
 
-        public async Task<IList<TEntity>> GetAllAsync(bool useSqlCache = false, bool useSqlCacheForAll = true, CancellationToken cancellationToken = default, Expression<Func<TEntity, bool>> expression = null, params IncludeDelegate<TEntity>[] includeDelegates)
+        public async Task<IList<TEntity>> GetAllAsync(CancellationToken cancellationToken = default, Expression<Func<TEntity, bool>> expression = null, params IncludeDelegate<TEntity>[] includeDelegates)
         {
             return await GetQueryWithIncludedData(expression, includeDelegates).ToListAsync(cancellationToken);
         }
@@ -98,7 +89,7 @@ namespace PasswordManager.Services.Services.Shared
 
         #region Post
 
-        public async Task<TEntity> CreateAsync(TEntity entity, bool useSqlCache = false, bool useSqlCacheForAll = true, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
+        public async Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
         {
             await _dbSet.AddAsync(entity, cancellationToken);
 
@@ -111,7 +102,7 @@ namespace PasswordManager.Services.Services.Shared
 
         #region Post-Range
 
-        public async Task<IList<TEntity>> CreateRangeAsync(IList<TEntity> entities, bool useSqlCache = false, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
+        public async Task<IList<TEntity>> CreateRangeAsync(IList<TEntity> entities, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
         {
             await _dbSet.AddRangeAsync(entities, cancellationToken);
 
@@ -124,7 +115,7 @@ namespace PasswordManager.Services.Services.Shared
 
         #region Put
 
-        public async Task<TEntity> UpdateAsync(TEntity entity, bool useSqlCache = false, bool useSqlCacheForAll = true, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
+        public async Task<TEntity> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
         {
             GenerateEntityUpdatedOnValue(entity);
             _dbSet.Update(entity);
@@ -138,7 +129,7 @@ namespace PasswordManager.Services.Services.Shared
 
         #region Put-Range
 
-        public async Task UpdateRangeAsync(List<TEntity> entities, bool useSqlCache = false, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
+        public async Task UpdateRangeAsync(List<TEntity> entities, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
         {
             try
             {
@@ -156,7 +147,7 @@ namespace PasswordManager.Services.Services.Shared
 
         #region Delete
 
-        public async Task<bool> DeleteAsync(TId id, bool useSqlCache = false, bool useSqlCacheForAll = true, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
+        public async Task<bool> DeleteAsync(TId id, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
 
         {
             var typeOfId = typeof(TId) == typeof(int) ? (object)Convert.ToInt32(id) : id.ToString();
@@ -175,7 +166,7 @@ namespace PasswordManager.Services.Services.Shared
 
         #region Delete-Range
 
-        public async Task<bool> DeleteRangeAsync(List<TEntity> entities, bool useSqlCache = false, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
+        public async Task<bool> DeleteRangeAsync(List<TEntity> entities, CancellationToken cancellationToken = default, params IncludeDelegate<TEntity>[] includeDelegates)
         {
             _dbSet.RemoveRange(entities);
 
@@ -188,7 +179,7 @@ namespace PasswordManager.Services.Services.Shared
 
         #region Delete-RangeByCondition
 
-        public async Task<bool> DeleteRangeByCondition(Expression<Func<TEntity, bool>> expression, bool useSqlCache = false, CancellationToken cancellationToken = default)
+        public async Task<bool> DeleteRangeByCondition(Expression<Func<TEntity, bool>> expression, CancellationToken cancellationToken = default)
         {
             var entities = _dbSet.Where(expression).AsQueryable();
             _dbSet.RemoveRange(entities);

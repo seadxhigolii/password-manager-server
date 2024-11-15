@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PasswordManager.Persistence.Contexts;
@@ -11,9 +12,11 @@ using PasswordManager.Persistence.Contexts;
 namespace PasswordManager.Persistence.Migrations
 {
     [DbContext(typeof(PasswordManagerDbContext))]
-    partial class PasswordManagerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241113015818_Removed some required constraints for Vaults table")]
+    partial class RemovedsomerequiredconstraintsforVaultstable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -184,6 +187,7 @@ namespace PasswordManager.Persistence.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("CardholderName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -205,22 +209,27 @@ namespace PasswordManager.Persistence.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("EncryptedCardNumber")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("EncryptedNotes")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("EncryptedPassword")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("EncryptedSecurityCode")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ExpirationDate")
+                        .IsRequired()
                         .HasMaxLength(5)
                         .HasColumnType("character varying(5)");
 
-                    b.Property<bool?>("IsFavorite")
+                    b.Property<bool>("IsFavorite")
                         .HasColumnType("boolean");
 
                     b.Property<int>("ItemType")
@@ -232,7 +241,7 @@ namespace PasswordManager.Persistence.Migrations
                     b.Property<bool>("Modified")
                         .HasColumnType("boolean");
 
-                    b.Property<int?>("PasswordHistory")
+                    b.Property<int>("PasswordHistory")
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
@@ -241,6 +250,7 @@ namespace PasswordManager.Persistence.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<string>("Url")
+                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
@@ -248,6 +258,7 @@ namespace PasswordManager.Persistence.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 

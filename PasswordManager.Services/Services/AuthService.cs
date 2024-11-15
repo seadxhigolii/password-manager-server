@@ -120,7 +120,8 @@ namespace PasswordManager.Services.Services
                 UserId = user.Id,
                 AuthToken = authToken,
                 PrivateKey = Convert.ToBase64String(privateKey),
-                Username = user.Username
+                Username = user.Username,
+                PublicKey = user.PublicKey
             };
 
             return new Response<UserLoggedInDto>
