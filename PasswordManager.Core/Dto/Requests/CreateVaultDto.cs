@@ -10,7 +10,7 @@ namespace PasswordManager.Core.Dto.Requests
         public VaultItemTypeEnum ItemType { get; set; }
         public string Title { get; set; }
         public string EncryptedPassword { get; set; }        
-        public string Username { get; set; }
+        public string Username { get; set; } 
 
     }
 }
