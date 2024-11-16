@@ -1,4 +1,4 @@
-﻿namespace PasswordManager.Core.Dto.Requests
+﻿namespace PasswordManager.Core.Dto.Requests.Auth
 {
     public class LoginDto
     {

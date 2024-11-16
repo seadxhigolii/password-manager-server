@@ -1,4 +1,4 @@
-﻿using PasswordManager.Core.Dto.Requests;
+﻿using PasswordManager.Core.Dto.Requests.Auth;
 using PasswordManager.Core.Dto.Responses;
 using PasswordManager.Core.Shared;
 

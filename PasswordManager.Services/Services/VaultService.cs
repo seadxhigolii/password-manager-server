@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using PasswordManager.Core.Domain;
-using PasswordManager.Core.Dto.Requests;
+using PasswordManager.Core.Dto.Requests.VaultDtos;
 using PasswordManager.Core.Shared;
 using PasswordManager.Persistence.Contexts;
 using PasswordManager.Services.Interfaces;
@@ -40,6 +41,28 @@ namespace PasswordManager.Services.Services
                 return new Response<bool>(data: true, succeeded: true, message: "The vault has been successfully added!", statusCode: (int)HttpStatusCode.OK);
 
             return new Response<bool>(data: false, succeeded: false, message: "", statusCode: (int)HttpStatusCode.InternalServerError);
-        }    
+        }
+        public async Task<Response<IList<Vault>>> GetByUserId(GetVaultsByUserId entity, CancellationToken cancellationToken)
+        {
+            var data = await GetByCondition(vault => vault.UserId == entity.UserId).ToListAsync(cancellationToken);
+
+            if (data.Any())
+            {
+                return new Response<IList<Vault>>(
+                    data: data,
+                    succeeded: true,
+                    message: "The vaults have been successfully retrieved!",
+                    statusCode: (int)HttpStatusCode.OK
+                );
+            }
+
+            return new Response<IList<Vault>>(
+                data: null,
+                succeeded: false,
+                message: "No vaults could be found for the specified user.",
+                statusCode: (int)HttpStatusCode.NotFound
+            );
+        }
+
     }
 }

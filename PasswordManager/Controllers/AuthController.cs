@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PasswordManager.Api.Controllers.Shared;
-using PasswordManager.Core.Dto.Requests;
+using PasswordManager.Core.Dto.Requests.Auth;
 using PasswordManager.Core.Dto.Responses;
 using PasswordManager.Core.Shared;
 using PasswordManager.Services.Interfaces;
