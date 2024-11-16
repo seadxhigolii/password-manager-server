@@ -11,12 +11,6 @@ namespace PasswordManager.Api.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly IAuthService _authService;
-
-        public VaultController(IAuthService authService)
-        {
-            _authService = authService;
-        }
-
         private readonly IVaultService _vaultService;
 
         public VaultController(IConfiguration configuration, IAuthService authService, IVaultService vaultService)

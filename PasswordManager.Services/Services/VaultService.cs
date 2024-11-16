@@ -32,16 +32,37 @@ namespace PasswordManager.Services.Services
 
         public async Task<Response<bool>> CreateAsync(CreateVaultDto entity, CancellationToken cancellationToken)
         {
+            
             var vault = entity.ToEntity();
-            var data = await CreateAsync(
-                                          entity: vault,
-                                          cancellationToken: cancellationToken
-                                        );
-            if (data != null)
-                return new Response<bool>(data: true, succeeded: true, message: "The vault has been successfully added!", statusCode: (int)HttpStatusCode.OK);
 
-            return new Response<bool>(data: false, succeeded: false, message: "", statusCode: (int)HttpStatusCode.InternalServerError);
+            var faviconData = await FetchFaviconAsync(entity.Url, cancellationToken);
+
+            if (faviconData != null)
+            {
+                vault.FavIcon = faviconData;
+            }
+
+            var data = await CreateAsync(vault, cancellationToken);
+
+            if (data != null)
+            {
+                return new Response<bool>(
+                    data: true,
+                    succeeded: true,
+                    message: "The vault has been successfully added!",
+                    statusCode: (int)HttpStatusCode.OK
+                );
+            }
+
+            return new Response<bool>(
+                data: false,
+                succeeded: false,
+                message: "Failed to add the vault.",
+                statusCode: (int)HttpStatusCode.InternalServerError
+            );
+            
         }
+
         public async Task<Response<IList<Vault>>> GetByUserId(GetVaultsByUserId entity, CancellationToken cancellationToken)
         {
             var data = await GetByCondition(vault => vault.UserId == entity.UserId).ToListAsync(cancellationToken);
@@ -63,6 +84,43 @@ namespace PasswordManager.Services.Services
                 statusCode: (int)HttpStatusCode.NotFound
             );
         }
+
+        private async Task<byte[]?> FetchFaviconAsync(string? url, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return null;
+
+            try
+            {
+                if (!url.StartsWith("http://") && !url.StartsWith("https://"))
+                {
+                    url = "http://" + url;
+                }
+
+                if (!Uri.TryCreate(url, UriKind.Absolute, out var baseUri))
+                {
+                    throw new UriFormatException("The provided URL is not a valid absolute URI.");
+                }
+
+                var faviconUrl = new Uri(baseUri, "/favicon.ico").ToString();
+
+                using var httpClient = new HttpClient();
+                var response = await httpClient.GetAsync(faviconUrl, cancellationToken);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching favicon: {ex.Message}");
+            }
+
+            return null;
+        }
+
+
 
     }
 }

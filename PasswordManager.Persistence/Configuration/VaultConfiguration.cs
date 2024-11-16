@@ -23,19 +23,21 @@ namespace PasswordManager.Persistence.Configuration
 
             builder.Property(p => p.LastAccessedOn).IsRequired(false);
 
-            builder.Property(p => p.Username).IsRequired(false).HasMaxLength(100);
+            builder.Property(p => p.Username).HasMaxLength(100).IsRequired(false);
 
             builder.Property(p => p.EncryptedPassword).IsRequired(false);
 
-            builder.Property(p => p.Url).IsRequired(false).HasMaxLength(200);
+            builder.Property(p => p.Url).HasMaxLength(200).IsRequired(false);
+
+            builder.Property(p => p.FavIcon).IsRequired(false);
 
             builder.Property(p => p.PasswordHistory).IsRequired(false); ;
 
-            builder.Property(p => p.CardholderName).IsRequired(false).HasMaxLength(100);
+            builder.Property(p => p.CardholderName).HasMaxLength(100).IsRequired(false);
 
             builder.Property(p => p.EncryptedCardNumber).IsRequired(false);
 
-            builder.Property(p => p.ExpirationDate).IsRequired(false).HasMaxLength(5); // Format: MM/YY
+            builder.Property(p => p.ExpirationDate).HasMaxLength(5).IsRequired(false); // Format: MM/YY
 
             builder.Property(p => p.EncryptedSecurityCode).IsRequired(false);
 

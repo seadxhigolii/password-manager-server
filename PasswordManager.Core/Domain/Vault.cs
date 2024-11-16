@@ -19,6 +19,7 @@ namespace PasswordManager.Core.Domain
         public string? Username { get; set; }
         public string? EncryptedPassword { get; set; }
         public string? Url { get; set; }
+        public byte[]? FavIcon { get; set; }
         public int? PasswordHistory { get; set; }
 
         // Bank-Card-specific properties
