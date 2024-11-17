@@ -33,5 +33,12 @@ namespace PasswordManager.Api.Controllers
             var result = await _vaultService.GetByUserId(entity, cancellationToken);
             return result;
         }
+
+        [HttpPost("GetById")]
+        public async Task<Response<Vault>> GetById([FromBody] GetVaultById entity, CancellationToken cancellationToken)
+        {
+            var result = await _vaultService.GetById(entity, cancellationToken);
+            return result;
+        }
     }
 }

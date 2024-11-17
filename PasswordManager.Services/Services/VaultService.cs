@@ -65,7 +65,6 @@ namespace PasswordManager.Services.Services
             );
         }
 
-
         public async Task<Response<IList<Vault>>> GetByUserId(GetVaultsByUserId entity, CancellationToken cancellationToken)
         {
             var data = await GetByCondition(vault => vault.UserId == entity.UserId && !vault.Deleted).ToListAsync(cancellationToken);
@@ -84,6 +83,28 @@ namespace PasswordManager.Services.Services
                 data: null,
                 succeeded: false,
                 message: "No vaults could be found for the specified user.",
+                statusCode: (int)HttpStatusCode.NotFound
+            );
+        }
+
+        public async Task<Response<Vault>> GetById(GetVaultById entity, CancellationToken cancellationToken)
+        {
+            var data = await GetByCondition(vault => vault.Id == entity.Id && !vault.Deleted).FirstOrDefaultAsync(cancellationToken);
+
+            if (data != null)
+            {
+                return new Response<Vault>(
+                    data: data,
+                    succeeded: true,
+                    message: "The vaults have been successfully retrieved!",
+                    statusCode: (int)HttpStatusCode.OK
+                );
+            }
+
+            return new Response<Vault>(
+                data: null,
+                succeeded: false,
+                message: "No vaults could be found for the specified Id.",
                 statusCode: (int)HttpStatusCode.NotFound
             );
         }
