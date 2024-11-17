@@ -27,17 +27,24 @@ namespace PasswordManager.Api.Controllers
             return result;
         }
 
-        [HttpPost("GetAllByUserId")]
-        public async Task<Response<IList<Vault>>> GetAllByUserId([FromBody] GetVaultsByUserId entity, CancellationToken cancellationToken)
+        [HttpGet("GetAllByUserId/{userId}")]
+        public async Task<Response<IList<Vault>>> GetAllByUserId(Guid userId, CancellationToken cancellationToken)
         {
-            var result = await _vaultService.GetByUserId(entity, cancellationToken);
+            var result = await _vaultService.GetByUserIdAsync(userId, cancellationToken);
             return result;
         }
 
-        [HttpPost("GetById")]
-        public async Task<Response<Vault>> GetById([FromBody] GetVaultById entity, CancellationToken cancellationToken)
+        [HttpGet("GetById/{vaultId}")]
+        public async Task<Response<Vault>> GetById(Guid vaultId, CancellationToken cancellationToken)
         {
-            var result = await _vaultService.GetById(entity, cancellationToken);
+            var result = await _vaultService.GetByIdAsync(vaultId, cancellationToken);
+            return result;
+        }
+
+        [HttpPut("GetById/{vaultId}")]
+        public async Task<Response<bool>> Update(Guid vaultId, [FromBody] UpdateVaultDto vault, CancellationToken cancellationToken)
+        {
+            var result = await _vaultService.UpdateAsync(vaultId, vault, cancellationToken);
             return result;
         }
     }

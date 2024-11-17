@@ -24,7 +24,7 @@ namespace PasswordManager
             builder.Services.AddHttpClient();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.RegisterIoCServices();
-            builder.Services.AddSwaggerGen(); 
+            //builder.Services.AddSwaggerGen(); 
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddApiVersioning(options =>
@@ -84,8 +84,8 @@ namespace PasswordManager
 
             if (app.Environment.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                //app.UseSwagger();
+                //app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();

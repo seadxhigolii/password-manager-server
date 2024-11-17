@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using PasswordManager.Core.Domain;
 using PasswordManager.Core.Dto.Requests.Auth;
-using PasswordManager.Core.Dto.Responses;
+using PasswordManager.Core.Dto.Responses.AuthDtos;
 using PasswordManager.Core.Shared;
 using PasswordManager.Persistence.Contexts;
 using PasswordManager.Services.Helpers;

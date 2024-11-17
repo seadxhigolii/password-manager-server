@@ -1,5 +1,5 @@
 ﻿using PasswordManager.Core.Dto.Requests.Auth;
-using PasswordManager.Core.Dto.Responses;
+using PasswordManager.Core.Dto.Responses.AuthDtos;
 using PasswordManager.Core.Shared;
 
 namespace PasswordManager.Services.Interfaces

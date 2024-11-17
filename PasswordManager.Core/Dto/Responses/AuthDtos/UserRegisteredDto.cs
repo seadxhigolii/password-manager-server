@@ -1,4 +1,4 @@
-﻿namespace PasswordManager.Core.Dto.Responses
+﻿namespace PasswordManager.Core.Dto.Responses.AuthDtos
 {
     public class UserRegisteredDto
     {

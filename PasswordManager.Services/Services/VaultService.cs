@@ -65,9 +65,9 @@ namespace PasswordManager.Services.Services
             );
         }
 
-        public async Task<Response<IList<Vault>>> GetByUserId(GetVaultsByUserId entity, CancellationToken cancellationToken)
+        public async Task<Response<IList<Vault>>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var data = await GetByCondition(vault => vault.UserId == entity.UserId && !vault.Deleted).ToListAsync(cancellationToken);
+            var data = await GetByCondition(vault => vault.UserId == userId && !vault.Deleted).ToListAsync(cancellationToken);
 
             if (data.Any())
             {
@@ -87,9 +87,9 @@ namespace PasswordManager.Services.Services
             );
         }
 
-        public async Task<Response<Vault>> GetById(GetVaultById entity, CancellationToken cancellationToken)
+        public async Task<Response<Vault>> GetByIdAsync(Guid vaultId, CancellationToken cancellationToken)
         {
-            var data = await GetByCondition(vault => vault.Id == entity.Id && !vault.Deleted).FirstOrDefaultAsync(cancellationToken);
+            var data = await GetByCondition(vault => vault.Id == vaultId && !vault.Deleted).FirstOrDefaultAsync(cancellationToken);
 
             if (data != null)
             {
@@ -108,6 +108,61 @@ namespace PasswordManager.Services.Services
                 statusCode: (int)HttpStatusCode.NotFound
             );
         }
+
+        public async Task<Response<bool>> UpdateAsync(Guid vaultId, UpdateVaultDto vaultDto, CancellationToken cancellationToken)
+        {
+            var existingVault = await GetByCondition(vault => vault.Id == vaultId && !vault.Deleted)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (existingVault == null)
+            {
+                return new Response<bool>(
+                    data: false,
+                    succeeded: false,
+                    message: "No vaults could be found for the specified Id.",
+                    statusCode: (int)HttpStatusCode.NotFound
+                );
+            }
+
+            existingVault.Title = vaultDto.Title;
+            existingVault.Username = vaultDto.Username;
+            existingVault.EncryptedPassword = vaultDto.EncryptedPassword;
+            existingVault.Url = vaultDto.Url;
+            existingVault.ChangedOn = DateTime.UtcNow;
+
+            try
+            {
+                var updatedVault = await UpdateAsync(existingVault, cancellationToken);
+
+                if (updatedVault != null)
+                {
+                    return new Response<bool>(
+                        data: true,
+                        succeeded: true,
+                        message: "The vault has been successfully updated!",
+                        statusCode: (int)HttpStatusCode.OK
+                    );
+                }
+
+                return new Response<bool>(
+                    data: false,
+                    succeeded: false,
+                    message: "Failed to update the vault.",
+                    statusCode: (int)HttpStatusCode.InternalServerError
+                );
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>(
+                    data: false,
+                    succeeded: false,
+                    message: "An error occurred while updating the vault.",
+                    statusCode: (int)HttpStatusCode.InternalServerError
+                );
+            }
+        }
+
+
 
         private async Task<byte[]?> FetchFaviconAsync(string? url, CancellationToken cancellationToken)
         {
