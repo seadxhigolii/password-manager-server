@@ -8,7 +8,11 @@ using PasswordManager.Services.Interfaces;
 using PasswordManager.Services.Interfaces.Decryption;
 using PasswordManager.Services.Interfaces.Encryption;
 using PasswordManager.Services.Services.Shared;
+using System.Drawing;
 using System.Net;
+using static System.Net.Mime.MediaTypeNames;
+
+using sd = System.Drawing;
 
 namespace PasswordManager.Services.Services
 {
@@ -32,7 +36,6 @@ namespace PasswordManager.Services.Services
 
         public async Task<Response<bool>> CreateAsync(CreateVaultDto entity, CancellationToken cancellationToken)
         {
-            
             var vault = entity.ToEntity();
 
             var faviconData = await FetchFaviconAsync(entity.Url, cancellationToken);
@@ -60,12 +63,12 @@ namespace PasswordManager.Services.Services
                 message: "Failed to add the vault.",
                 statusCode: (int)HttpStatusCode.InternalServerError
             );
-            
         }
+
 
         public async Task<Response<IList<Vault>>> GetByUserId(GetVaultsByUserId entity, CancellationToken cancellationToken)
         {
-            var data = await GetByCondition(vault => vault.UserId == entity.UserId).ToListAsync(cancellationToken);
+            var data = await GetByCondition(vault => vault.UserId == entity.UserId && !vault.Deleted).ToListAsync(cancellationToken);
 
             if (data.Any())
             {
@@ -90,37 +93,51 @@ namespace PasswordManager.Services.Services
             if (string.IsNullOrWhiteSpace(url))
                 return null;
 
-            try
+            if (!url.StartsWith("http://") && !url.StartsWith("https://"))
             {
-                if (!url.StartsWith("http://") && !url.StartsWith("https://"))
-                {
-                    url = "http://" + url;
-                }
-
-                if (!Uri.TryCreate(url, UriKind.Absolute, out var baseUri))
-                {
-                    throw new UriFormatException("The provided URL is not a valid absolute URI.");
-                }
-
-                var faviconUrl = new Uri(baseUri, "/favicon.ico").ToString();
-
-                using var httpClient = new HttpClient();
-                var response = await httpClient.GetAsync(faviconUrl, cancellationToken);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return await response.Content.ReadAsByteArrayAsync(cancellationToken);
-                }
+                url = "http://" + url;
             }
-            catch (Exception ex)
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var baseUri))
             {
-                Console.WriteLine($"Error fetching favicon: {ex.Message}");
+                throw new UriFormatException("The provided URL is not a valid absolute URI.");
             }
+
+            var faviconUrl = new Uri(baseUri, "/favicon.ico").ToString();
+
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync(faviconUrl, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var faviconBytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+                return ResizeImage(faviconBytes, 20, 20);
+            }
+            
 
             return null;
         }
 
+        private byte[]? ResizeImage(byte[] imageBytes, int width, int height)
+        {
+            using var ms = new MemoryStream(imageBytes);
+            using var originalImage = sd.Image.FromStream(ms);
+            var resizedImage = new Bitmap(width, height);
 
+            using (var graphics = Graphics.FromImage(resizedImage))
+            {
+                graphics.CompositingQuality = sd.Drawing2D.CompositingQuality.HighQuality;
+                graphics.InterpolationMode = sd.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = sd.Drawing2D.SmoothingMode.HighQuality;
+
+                graphics.DrawImage(originalImage, 0, 0, width, height);
+            }
+
+            using var outputStream = new MemoryStream();
+            resizedImage.Save(outputStream, sd.Imaging.ImageFormat.Png);
+            return outputStream.ToArray();
+            
+        }
 
     }
 }
