@@ -8,6 +8,8 @@ using System.Text;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using PasswordManager.Configuration.Extensions;
+using Serilog.Sinks.PostgreSQL;
+using NpgsqlTypes;
 
 namespace PasswordManager
 {
@@ -17,6 +19,24 @@ namespace PasswordManager
         {
 
             var builder = WebApplication.CreateBuilder(args);
+
+            var _columnOptions = new Dictionary<string, ColumnWriterBase>
+            {
+                { "Timestamp", new TimestampColumnWriter(NpgsqlDbType.Timestamp) },
+                { "Level", new LevelColumnWriter(true, NpgsqlDbType.Varchar) },
+                { "Message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
+                { "Exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
+                { "Properties", new PropertiesColumnWriter(NpgsqlDbType.Jsonb) },
+                { "LogEvent", new RenderedMessageColumnWriter(NpgsqlDbType.Text) }
+            };
+
+            Serilog.Log.Logger = new LoggerConfiguration()
+            .WriteTo.PostgreSQL(
+                connectionString: builder.Configuration.GetConnectionString("PasswordManagerDatabase"),
+                tableName: "Serilog",
+                needAutoCreateTable: true,
+                columnOptions: _columnOptions)
+            .CreateLogger();
 
             builder.Host.UseSerilog();
 
