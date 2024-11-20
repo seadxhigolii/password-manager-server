@@ -10,6 +10,7 @@ using PasswordManager.Services.Interfaces.Encryption;
 using PasswordManager.Services.Services.Shared;
 using System.Drawing;
 using System.Net;
+using System.Net.Sockets;
 using static System.Net.Mime.MediaTypeNames;
 
 using sd = System.Drawing;
@@ -109,19 +110,32 @@ namespace PasswordManager.Services.Services
             );
         }
 
-        public async Task<Response<bool>> UpdateAsync(Guid vaultId, UpdateVaultDto vaultDto, CancellationToken cancellationToken)
+        public async Task<Response<Vault>> UpdateAsync(Guid vaultId, UpdateVaultDto vaultDto, CancellationToken cancellationToken)
         {
             var existingVault = await GetByCondition(vault => vault.Id == vaultId && !vault.Deleted)
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (existingVault == null)
             {
-                return new Response<bool>(
-                    data: false,
+                return new Response<Vault>(
+                    data: null,
                     succeeded: false,
                     message: "No vaults could be found for the specified Id.",
                     statusCode: (int)HttpStatusCode.NotFound
                 );
+            }
+
+            if (!string.Equals(existingVault.Url, vaultDto.Url, StringComparison.OrdinalIgnoreCase))
+            {
+                var faviconData = await FetchFaviconAsync(vaultDto.Url, cancellationToken);
+                if (faviconData != null)
+                {
+                    existingVault.FavIcon = faviconData;
+                }
+                else
+                {
+                    existingVault.FavIcon = null;
+                }
             }
 
             existingVault.Title = vaultDto.Title;
@@ -136,16 +150,16 @@ namespace PasswordManager.Services.Services
 
                 if (updatedVault != null)
                 {
-                    return new Response<bool>(
-                        data: true,
+                    return new Response<Vault>(
+                        data: updatedVault,
                         succeeded: true,
                         message: "The vault has been successfully updated!",
                         statusCode: (int)HttpStatusCode.OK
                     );
                 }
 
-                return new Response<bool>(
-                    data: false,
+                return new Response<Vault>(
+                    data: null,
                     succeeded: false,
                     message: "Failed to update the vault.",
                     statusCode: (int)HttpStatusCode.InternalServerError
@@ -153,16 +167,14 @@ namespace PasswordManager.Services.Services
             }
             catch (Exception ex)
             {
-                return new Response<bool>(
-                    data: false,
+                return new Response<Vault>(
+                    data: null,
                     succeeded: false,
                     message: "An error occurred while updating the vault.",
                     statusCode: (int)HttpStatusCode.InternalServerError
                 );
             }
         }
-
-
 
         private async Task<byte[]?> FetchFaviconAsync(string? url, CancellationToken cancellationToken)
         {
@@ -181,39 +193,53 @@ namespace PasswordManager.Services.Services
 
             var faviconUrl = new Uri(baseUri, "/favicon.ico").ToString();
 
-            using var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync(faviconUrl, cancellationToken);
-
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var faviconBytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
-                return ResizeImage(faviconBytes, 20, 20);
+                using var httpClient = new HttpClient();
+                var response = await httpClient.GetAsync(faviconUrl, cancellationToken);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var faviconBytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+                    return ResizeImage(faviconBytes, 20, 20);
+                }
             }
-            
+            catch (Exception)
+            {
+                return null;
+            }
 
             return null;
         }
 
+
         private byte[]? ResizeImage(byte[] imageBytes, int width, int height)
         {
-            using var ms = new MemoryStream(imageBytes);
-            using var originalImage = sd.Image.FromStream(ms);
-            var resizedImage = new Bitmap(width, height);
-
-            using (var graphics = Graphics.FromImage(resizedImage))
+            try
             {
-                graphics.CompositingQuality = sd.Drawing2D.CompositingQuality.HighQuality;
-                graphics.InterpolationMode = sd.Drawing2D.InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = sd.Drawing2D.SmoothingMode.HighQuality;
+                using var ms = new MemoryStream(imageBytes);
+                using var originalImage = sd.Image.FromStream(ms);
+                var resizedImage = new Bitmap(width, height);
 
-                graphics.DrawImage(originalImage, 0, 0, width, height);
+                using (var graphics = Graphics.FromImage(resizedImage))
+                {
+                    graphics.CompositingQuality = sd.Drawing2D.CompositingQuality.HighQuality;
+                    graphics.InterpolationMode = sd.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    graphics.SmoothingMode = sd.Drawing2D.SmoothingMode.HighQuality;
+
+                    graphics.DrawImage(originalImage, 0, 0, width, height);
+                }
+
+                using var outputStream = new MemoryStream();
+                resizedImage.Save(outputStream, sd.Imaging.ImageFormat.Png);
+                return outputStream.ToArray();
             }
-
-            using var outputStream = new MemoryStream();
-            resizedImage.Save(outputStream, sd.Imaging.ImageFormat.Png);
-            return outputStream.ToArray();
-            
+            catch (Exception)
+            {
+                return null;
+            }
         }
+
 
     }
 }

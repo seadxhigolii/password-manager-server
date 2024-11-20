@@ -10,6 +10,6 @@ namespace PasswordManager.Services.Interfaces
         Task<Response<bool>> CreateAsync(CreateVaultDto vault, CancellationToken cancellationToken);
         Task<Response<IList<Vault>>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
         Task<Response<Vault>> GetByIdAsync(Guid vaultId, CancellationToken cancellationToken);
-        Task<Response<bool>> UpdateAsync(Guid vaultId, UpdateVaultDto vault, CancellationToken cancellationToken);
+        Task<Response<Vault>> UpdateAsync(Guid vaultId, UpdateVaultDto vault, CancellationToken cancellationToken);
     }
 }

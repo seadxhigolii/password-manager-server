@@ -39,6 +39,8 @@ namespace PasswordManager.Configuration.Middlewares
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<PasswordManagerDbContext>();
 
+                var methodName = GetMethodNameFromException(exception);
+
                 var logEntry = new pmc.Log
                 {
                     Id = Guid.NewGuid(),
@@ -47,7 +49,7 @@ namespace PasswordManager.Configuration.Middlewares
                     Message = exception.Message,
                     Exception = exception.ToString(),
                     Properties = null,
-                    LogEvent = "ExceptionMiddleware"
+                    LogEvent = methodName
                 };
 
                 await dbContext.Logs.AddAsync(logEntry);
@@ -63,5 +65,20 @@ namespace PasswordManager.Configuration.Middlewares
 
             await context.Response.WriteAsJsonAsync(result);
         }
+
+        private string GetMethodNameFromException(Exception exception)
+        {
+            try
+            {
+                var stackTrace = new System.Diagnostics.StackTrace(exception, true);
+                var frame = stackTrace.GetFrame(0);
+                var method = frame?.GetMethod();
+                return method?.DeclaringType?.FullName + "." + method?.Name ?? "UnknownMethod";
+            catch
+            {
+                return "UnknownMethod";
+            }
+        }
+
     }
 }

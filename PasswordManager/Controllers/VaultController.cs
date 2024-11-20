@@ -41,8 +41,8 @@ namespace PasswordManager.Api.Controllers
             return result;
         }
 
-        [HttpPut("GetById/{vaultId}")]
-        public async Task<Response<bool>> Update(Guid vaultId, [FromBody] UpdateVaultDto vault, CancellationToken cancellationToken)
+        [HttpPut("Update/{vaultId}")]
+        public async Task<Response<Vault>> Update(Guid vaultId, [FromBody] UpdateVaultDto vault, CancellationToken cancellationToken)
         {
             var result = await _vaultService.UpdateAsync(vaultId, vault, cancellationToken);
             return result;

@@ -9,7 +9,7 @@ namespace PasswordManager.Core.Dto.Requests.VaultDtos
         public Guid Id { get; set; }
         public string Title { get; set; }
         public VaultItemTypeEnum ItemType { get; set; }
-        public string EncryptedNotes { get; set; }
+        public string? EncryptedNotes { get; set; }
         public bool? IsFavorite { get; set; }
 
 
