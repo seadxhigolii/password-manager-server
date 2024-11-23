@@ -140,7 +140,20 @@ namespace PasswordManager.Services.Services
 
             existingVault.Title = vaultDto.Title;
             existingVault.Username = vaultDto.Username;
-            existingVault.EncryptedPassword = vaultDto.EncryptedPassword;
+
+            if (!string.IsNullOrEmpty(vaultDto.EncryptedPassword))
+            {
+                existingVault.EncryptedPassword = vaultDto.EncryptedPassword;
+                if(existingVault.PasswordHistory == null)
+                {
+                    existingVault.PasswordHistory = 2;
+                }
+                else
+                {
+                    existingVault.PasswordHistory++;
+                }
+            }
+
             existingVault.Url = vaultDto.Url;
             existingVault.ChangedOn = DateTime.UtcNow;
 
