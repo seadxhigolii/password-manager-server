@@ -2,19 +2,18 @@
 using Serilog.Sinks.PostgreSQL;
 namespace PasswordManager.Configuration.Serilog
 {
-    public class ColumnWriters
+    public static class ColumnWriters
     {
-        public Dictionary<string, ColumnWriterBase> GetColumnWriters()
+        public static Dictionary<string, ColumnWriterBase> GetColumnWriters()
         {
             var columnWriters = new Dictionary<string, ColumnWriterBase>
             {
-                { "message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
-                { "message_template", new MessageTemplateColumnWriter(NpgsqlDbType.Text) },
-                { "level", new LevelColumnWriter(true, NpgsqlDbType.Varchar) },
-                { "timestamp", new TimestampColumnWriter(NpgsqlDbType.Timestamp) },
-                { "exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
-                { "properties", new LogEventSerializedColumnWriter(NpgsqlDbType.Jsonb) },
-                { "machine_name", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text) }
+                { "Timestamp", new TimestampColumnWriter(NpgsqlDbType.Timestamp) },
+                { "Level", new LevelColumnWriter(true, NpgsqlDbType.Varchar) },
+                { "Message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
+                { "Exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
+                { "Properties", new PropertiesColumnWriter(NpgsqlDbType.Jsonb) },
+                { "LogEvent", new RenderedMessageColumnWriter(NpgsqlDbType.Text) }
             };
 
             return columnWriters;
