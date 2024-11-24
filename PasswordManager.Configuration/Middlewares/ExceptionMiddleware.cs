@@ -25,27 +25,9 @@ namespace PasswordManager.Configuration.Middlewares
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "An unhandled exception occurred.");
-
-                await HandleExceptionAsync(httpContext, ex);
+                var (statusCode, message) = GetExceptionDetails(ex);
+                Log.Error(ex, "An unhandled exception occurred: {Message}", message);
             }
-        }
-
-        private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
-        {
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-            var (statusCode, message) = GetExceptionDetails(exception);
-
-            var response = new
-            {
-                StatusCode = context.Response.StatusCode,
-                Message = message,
-                Details = exception.Message
-            };
-
-            await context.Response.WriteAsJsonAsync(response);
         }
 
         private static (int StatusCode, string Message) GetExceptionDetails(Exception exception)
@@ -61,7 +43,7 @@ namespace PasswordManager.Configuration.Middlewares
                 InvalidOperationException => ((int)HttpStatusCode.BadRequest, "The request could not be processed."),
                 ArgumentException => ((int)HttpStatusCode.BadRequest, "One or more arguments provided are invalid."),
 
-                TimeoutException => ((int)HttpStatusCode.RequestTimeout, "The request timed out. Please try again later."),
+                TimeoutException => ((int)HttpStatusCode.RequestTimeout, "The request timed out."),
 
                 NotSupportedException => ((int)HttpStatusCode.MethodNotAllowed, "This operation is not supported."),
 
@@ -76,7 +58,7 @@ namespace PasswordManager.Configuration.Middlewares
 
                 HttpRequestException => ((int)HttpStatusCode.BadGateway, "A network error occurred while processing the request."),
 
-                _ => ((int)HttpStatusCode.InternalServerError, "An unexpected error occurred. Please try again later.")
+                _ => ((int)HttpStatusCode.InternalServerError, "An unexpected error occurred.")
             };
         }
 

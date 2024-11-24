@@ -12,12 +12,13 @@ namespace PasswordManager.Configuration.Extensions
             var _columnOptions = Serilog.ColumnWriters.GetColumnWriters();
 
             srl.Log.Logger = new LoggerConfiguration()
-            .WriteTo.PostgreSQL(
-                connectionString: builder.Configuration.GetConnectionString("PasswordManagerDatabase"),
-                tableName: "Serilog",
-                needAutoCreateTable: true,
-                columnOptions: _columnOptions)
-            .CreateLogger();
+                .MinimumLevel.Error()
+                .WriteTo.PostgreSQL(
+                    connectionString: builder.Configuration.GetConnectionString("PasswordManagerDatabase"),
+                    tableName: "Serilog",
+                    needAutoCreateTable: true,
+                    columnOptions: _columnOptions)
+                .CreateLogger();
 
             builder.Host.UseSerilog();
         }

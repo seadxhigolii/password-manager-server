@@ -1,15 +1,10 @@
 using PasswordManager.Persistence.Contexts;
 using PasswordManager.Configuration.Middlewares;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Serilog;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using PasswordManager.Configuration.Extensions;
-using Serilog.Sinks.PostgreSQL;
-using NpgsqlTypes;
 
 namespace PasswordManager
 {
